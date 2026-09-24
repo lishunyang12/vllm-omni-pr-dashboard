@@ -9,7 +9,7 @@
   <title>Open PR Leaderboard · vLLM-Omni</title>
   <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="style.css?v=2">
-  <script defer src="app.js?v=3"></script>
+  <script defer src="app.js?v=4"></script>
 </head>
 <body>
   <div class="page-shell">
@@ -20,7 +20,7 @@
     <nav class="section-nav" aria-label="PR views"><a href="./" aria-current="page">Contributors</a><a href="topics/">Topics ↗</a></nav>
     <main>
       <section class="hero">
-        <div><div class="eyebrow"><span class="dot"></span> OPEN SOURCE, IN PROGRESS</div><h1>Open PR <span>Leaderboard</span></h1><p>See who is contributing and what is in progress.</p><p class="hero-note">Ranked by open PRs, including drafts. Counts measure activity, not quality.</p></div>
+        <div><div class="eyebrow"><span class="dot"></span> OPEN SOURCE, IN PROGRESS</div><h1>Open PR <span>Leaderboard</span></h1></div>
         <div class="snapshot"><div class="sync-state"><span class="dot"></span><span id="sync-label">Loading snapshot</span></div><time id="snapshot-time">—</time><div class="snapshot-actions"><button id="refresh" class="button" type="button"><span aria-hidden="true">↻</span> Refresh data</button><a href="data.json" class="subtle-link" download>Download JSON ↓</a></div></div>
       </section>
       <p id="notice" class="notice" role="status" hidden></p>
@@ -34,7 +34,7 @@
         <div class="leaderboard panel">
           <div class="panel-heading"><div><div class="overline">LEADERBOARD</div><h2>Contributor ranking <span id="author-count" class="count-pill">—</span></h2></div><button id="export" class="icon-button" title="Export current ranking as CSV" aria-label="Export current ranking as CSV">↓ CSV</button></div>
           <div class="filters"><label class="search"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="m16 16 5 5" stroke="currentColor" stroke-width="1.7"/></svg><input id="author-search" type="search" placeholder="Search GitHub username" aria-label="Search GitHub username" autocomplete="off"><kbd>/</kbd></label>
-            <div class="filter-line"><div class="segmented" aria-label="PR status"><button class="active" data-filter="all" aria-pressed="true">All</button><button data-filter="ready" aria-pressed="false">Non-draft</button><button data-filter="draft" aria-pressed="false">Draft</button></div><label class="sort-label"><span class="sr-only">Sort ranking</span><select id="sort"><option value="open">Most open PRs</option><option value="recent">Most submitted in 14d</option><option value="updated">Recently active</option></select></label></div>
+            <div class="filter-line"><div class="segmented" aria-label="PR status"><button class="active" data-filter="all" aria-pressed="true">All</button><button data-filter="ready" aria-pressed="false">Non-draft</button><button data-filter="draft" aria-pressed="false">Draft</button></div><label class="sort-label"><span class="sr-only">Sort ranking</span><select id="sort"><option value="open">Most open PRs</option><option value="recent">Most submitted in 14d</option></select></label></div>
             <div class="scope-line"><span id="scope">Loading…</span><span class="scope-options"><label><input id="exclude-committers" type="checkbox"> Exclude committers</label></span></div>
           </div>
           <div class="table-heading"><span>#</span><span>Contributors</span><span>Open PR</span><span title="PRs created in the last 14 days, including merged and closed">New · 14d</span><span class="draft-column">Draft</span></div>
@@ -50,7 +50,7 @@
       </section>
       <details class="method"><summary>Ranking &amp; methodology <span>How this works</span><span class="expand">＋</span></summary><div class="method-content">
 <p><strong>Coverage.</strong> Every open PR in vllm-project/vllm-omni, including drafts; bot accounts are excluded. Cursor pagination avoids the 1,000-result search limit. The contributor list includes accounts with at least one current open PR.</p>
-<p><strong>Ranking.</strong> Open PR count is the default. Equal values share a rank. Status and committer filters recompute ranks; username search preserves them. You can also sort by 14-day submissions or recent activity. Counts are not a quality score.</p>
+<p><strong>Ranking.</strong> Open PR count is the default. Equal values share a rank. Status and committer filters recompute ranks; username search preserves them. You can also sort by 14-day submissions. Counts are not a quality score.</p>
 <p><strong>New · 14d.</strong> All PRs created by that author in a rolling 14-day window, including open, merged, and closed PRs. This column is unaffected by the Draft filter. Window: <span id="recent-window">Loading…</span>.</p>
 <p><strong>Exclude committers.</strong> Filters Active Committers and Lead Maintainers from the <a href="https://github.com/vllm-project/vllm-omni/blob/main/docs/community/governance.md" target="_blank" rel="noopener noreferrer">official governance roster</a> (<span id="committer-roster-count">—</span> people). The roster refreshes with the data. CODEOWNERS and organization membership are not used as proxies.</p>
 <p><strong>PR details.</strong> The right panel contains current open PRs only. Open a title or number to see the original PR. CI results and reviews are not collected.</p>

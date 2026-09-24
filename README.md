@@ -4,7 +4,7 @@ Public page: https://lishunyang12.github.io/vllm-omni-pr-dashboard/
 
 Ranks every author with at least one open PR in `vllm-project/vllm-omni`.
 Drafts are included; bot accounts are excluded from both views. PR count is not a quality score.
-The page includes tied ranks, author search, Draft filters, recent activity
+The page includes tied ranks, author search, Draft filters, 14-day submission
 sorting, per-author PR title/number search, GitHub links, CSV and JSON export.
 Only PR metadata is collected: no CI results, reviews, comments or code diffs.
 Both pages use English UI text and the unmodified official vLLM-Omni logo.

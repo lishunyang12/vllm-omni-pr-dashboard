@@ -58,7 +58,7 @@
       if (pr.draft) a.draft++; else a.ready++;
       if (pr.updated>a.updated) a.updated=pr.updated;
     }
-    const metric = a => state.sort==='updated' ? Date.parse(a.updated) : state.sort==='recent' ? (a.recent ?? 0) : a.prs.length;
+    const metric = a => state.sort==='recent' ? (a.recent ?? 0) : a.prs.length;
     state.ranked = [...groups.values()].sort((a,b)=>metric(b)-metric(a) || a.login.localeCompare(b.login,'en',{sensitivity:'base'}));
     let previous, rank=0;
     state.ranked.forEach((a,i)=>{const value=metric(a);if(value!==previous) rank=i+1; a.rank=rank;previous=value;});
@@ -72,7 +72,7 @@
   function renderAuthors() {
     const authors=state.visible.slice(0,state.limit);
     const max=Math.max(1,...state.ranked.map(a=>a.prs.length));
-    $('author-list').innerHTML=authors.map(a=>`<button class="author-row ${a.login===state.selected?'selected':''}" data-author="${esc(a.login)}" aria-pressed="${a.login===state.selected}" aria-label="Rank ${a.rank}, ${esc(a.login)}, ${a.prs.length} open PRs"><span class="rank ${a.rank<=3?'top-rank':''}">${String(a.rank).padStart(2,'0')}</span><span class="author-identity">${avatar(a)}<span><span class="login">${esc(a.login)}${a.bot?'<span class="bot-tag">BOT</span>':''}</span><span class="author-sub">${state.sort==='updated'?'Updated '+age(a.updated):`${a.ready} Non-draft · ${a.draft} Draft`}</span></span></span><span class="author-value">${fmt(a.prs.length)}<span class="mini-bar"><span style="width:${a.prs.length/max*100}%"></span></span></span><span class="recent-count" title="All PRs created in the last 14 days, including merged and closed">${a.recent===null?'—':fmt(a.recent)}</span><span class="draft-count ${a.draft?'':'zero'}">${a.draft||'—'}</span></button>`).join('') || '<div class="empty-state"><strong>No matching contributors</strong>Try another username or adjust the filters.</div>';
+    $('author-list').innerHTML=authors.map(a=>`<button class="author-row ${a.login===state.selected?'selected':''}" data-author="${esc(a.login)}" aria-pressed="${a.login===state.selected}" aria-label="Rank ${a.rank}, ${esc(a.login)}, ${a.prs.length} open PRs"><span class="rank ${a.rank<=3?'top-rank':''}">${String(a.rank).padStart(2,'0')}</span><span class="author-identity">${avatar(a)}<span><span class="login">${esc(a.login)}${a.bot?'<span class="bot-tag">BOT</span>':''}</span><span class="author-sub">${a.ready} Non-draft · ${a.draft} Draft</span></span></span><span class="author-value">${fmt(a.prs.length)}<span class="mini-bar"><span style="width:${a.prs.length/max*100}%"></span></span></span><span class="recent-count" title="All PRs created in the last 14 days, including merged and closed">${a.recent===null?'—':fmt(a.recent)}</span><span class="draft-count ${a.draft?'':'zero'}">${a.draft||'—'}</span></button>`).join('') || '<div class="empty-state"><strong>No matching contributors</strong>Try another username or adjust the filters.</div>';
     $('list-info').textContent=`Showing ${fmt(authors.length)} of ${fmt(state.visible.length)} contributors${state.query?' · ranks preserved':''}`;
     $('load-more').hidden=state.limit>=state.visible.length;
   }
