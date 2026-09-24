@@ -15,7 +15,7 @@
     group:choice('group',['model','hardware','area'],'model'),
     match:choice('match',['all','any'],'all'),status:choice('status',['all','ready','draft'],'all'),
     sort:choice('sort',['updated','created','oldest'],'updated'),
-    query:params.get('q')||'',exclude:params.get('exclude')==='committers',bots:params.get('bots')!=='0'
+    query:params.get('q')||'',exclude:params.get('exclude')==='committers'
   };
   if(state.selected.has('unclassified'))state.selected=new Set(['unclassified']);
   const notify=(message='')=>{$('notice').hidden=!message;$('notice').textContent=message;};
@@ -28,7 +28,6 @@
     if(state.sort!=='updated')p.set('sort',state.sort);
     if(state.query)p.set('q',state.query);
     if(state.exclude)p.set('exclude','committers');
-    if(!state.bots)p.set('bots','0');
     history.replaceState(null,'',location.pathname+(p.size?'?'+p:''));
   }
   function renderTopics() {
@@ -57,7 +56,7 @@
   function render() {
     if(!state.data)return;
     const query=state.query.trim().toLowerCase().replace(/^#/,'');
-    state.base=state.prs.filter(p=>(state.bots||!p.bot)&&(!state.exclude||!p.committer)&&
+    state.base=state.prs.filter(p=>!p.bot&&(!state.exclude||!p.committer)&&
       (state.status!=='ready'||!p.draft)&&(state.status!=='draft'||p.draft)&&
       (!query||`${p.number} ${p.title} ${p.author} ${(p.labels||[]).join(' ')}`.toLowerCase().includes(query)));
     state.results=state.base.filter(p=>{
@@ -67,7 +66,7 @@
       return [...state.selected][state.match==='all'?'every':'some'](id=>ids.has(id));
     }).sort((a,b)=>state.sort==='oldest'?a.created.localeCompare(b.created)||a.number-b.number:
       b[state.sort].localeCompare(a[state.sort])||b.number-a.number);
-    $('stat-total').textContent=fmt(state.data.total);
+    $('stat-total').textContent=fmt(state.prs.filter(p=>!p.bot).length);
     $('stat-matched').textContent=fmt(state.results.length);
     $('stat-authors').textContent=fmt(new Set(state.results.map(p=>p.author)).size);
     $('stat-unclassified').textContent=fmt(state.base.filter(p=>!p.matches.length).length);
@@ -105,7 +104,7 @@
     } finally {$('refresh').disabled=false;}
   }
   $('pr-search').value=state.query;$('match').value=state.match;$('sort').value=state.sort;
-  $('exclude-committers').checked=state.exclude;$('bots').checked=state.bots;
+  $('exclude-committers').checked=state.exclude;
   document.addEventListener('click',event=>{
     const topic=event.target.closest('button[data-topic]');if(topic)toggleTopic(topic.dataset.topic);
     const group=event.target.closest('[data-group]');if(group){state.group=group.dataset.group;$('topic-search').value='';if(state.data)renderTopics();syncURL();}
@@ -114,7 +113,7 @@
   $('topic-search').addEventListener('input',()=>{if(state.data)renderTopics();});
   $('pr-search').addEventListener('input',()=>{state.query=$('pr-search').value;state.limit=40;render();});
   for(const [id,key] of [['match','match'],['sort','sort']])$(id).addEventListener('change',()=>{state[key]=$(id).value;state.limit=40;render();});
-  for(const [id,key] of [['exclude-committers','exclude'],['bots','bots']])$(id).addEventListener('change',()=>{state[key]=$(id).checked;state.limit=40;render();});
+  for(const [id,key] of [['exclude-committers','exclude']])$(id).addEventListener('change',()=>{state[key]=$(id).checked;state.limit=40;render();});
   $('clear').addEventListener('click',()=>{state.selected.clear();state.limit=40;render();});
   $('view-unclassified').addEventListener('click',()=>{state.selected=new Set(['unclassified']);state.limit=40;render();});
   $('load-more').addEventListener('click',()=>{state.limit+=40;renderPRs();});

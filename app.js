@@ -4,7 +4,7 @@
   const fmt = n => new Intl.NumberFormat('en-US').format(n);
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const safeUrl = url => /^https:\/\//.test(url || '') ? esc(url) : '#';
-  const state = {data:null, filter:'all', sort:'open', bots:true, excludeCommitters:false, query:'', selected:new URLSearchParams(location.hash.slice(1)).get('author'), limit:60, ranked:[], visible:[]};
+  const state = {data:null, filter:'all', sort:'open', excludeCommitters:false, query:'', selected:new URLSearchParams(location.hash.slice(1)).get('author'), limit:60, ranked:[], visible:[]};
   const age = date => {
     const minutes = Math.max(0, Math.floor((Date.now() - Date.parse(date)) / 60000));
     if (minutes < 1) return 'just now';
@@ -24,17 +24,18 @@
   }
 
   function renderStats() {
-    const {pullRequests:prs, updatedAt, total, authors, pages} = state.data;
+    const {updatedAt, pages} = state.data;
+    const prs=state.data.pullRequests.filter(p=>!p.bot), total=prs.length;
+    const authors=new Set(prs.map(p=>p.author)).size;
     $('exclude-committers').disabled=!state.data.committers;
     $('committer-roster-count').textContent=state.data.committers?.logins.length??'—';
     const draft = prs.filter(p=>p.draft).length;
-    const bots = new Set(prs.filter(p=>p.bot).map(p=>p.author)).size;
     $('stat-total').textContent=fmt(total);
     $('stat-authors').textContent=fmt(authors);
     $('stat-ready').textContent=fmt(total-draft);
     $('stat-draft').textContent=fmt(draft);
     $('stat-active').textContent=fmt(prs.filter(p=>Date.parse(updatedAt)-Date.parse(p.updated)<7*86400000).length);
-    $('stat-humans').textContent=`${fmt(authors-bots)} people · ${bots} bot accounts`;
+    $('stat-humans').textContent='People with open PRs';
     $('ready-bar').style.width=`${total ? (total-draft)/total*100 : 0}%`;
     $('snapshot-time').textContent=dateLabel(updatedAt);
     $('snapshot-time').dateTime=updatedAt;
@@ -50,7 +51,7 @@
     const groups = new Map();
     const committers=new Set((state.data.committers?.logins||[]).map(login=>login.toLowerCase()));
     for (const pr of state.data.pullRequests) {
-      if ((state.excludeCommitters && committers.has(pr.author.toLowerCase())) || (!state.bots && pr.bot) || (state.filter==='ready' && pr.draft) || (state.filter==='draft' && !pr.draft)) continue;
+      if ((state.excludeCommitters && committers.has(pr.author.toLowerCase())) || pr.bot || (state.filter==='ready' && pr.draft) || (state.filter==='draft' && !pr.draft)) continue;
       if (!groups.has(pr.author)) groups.set(pr.author,{login:pr.author, avatar:pr.avatar, url:pr.authorUrl, bot:pr.bot, recent:state.data.recentSubmissions ? (Object.hasOwn(state.data.recentSubmissions.byAuthor,pr.author) ? state.data.recentSubmissions.byAuthor[pr.author] : 0) : null, prs:[], ready:0, draft:0, updated:''});
       const a=groups.get(pr.author);
       a.prs.push(pr);
@@ -125,7 +126,6 @@
     rankAuthors();
   }));
   $('sort').addEventListener('change',()=>{state.sort=$('sort').value;state.limit=60;rankAuthors();});
-  $('bots').addEventListener('change',()=>{state.bots=$('bots').checked;state.limit=60;rankAuthors();});
   $('exclude-committers').addEventListener('change',()=>{state.excludeCommitters=$('exclude-committers').checked;state.limit=60;rankAuthors();});
   $('load-more').addEventListener('click',()=>{state.limit+=60;renderAuthors();});
   $('pr-search').addEventListener('input',renderDetail);
